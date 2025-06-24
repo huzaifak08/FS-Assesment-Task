@@ -6,6 +6,7 @@ import 'package:fs_task_assesment/components/custom_text_field.dart';
 import 'package:fs_task_assesment/helpers/app_data.dart';
 import 'package:fs_task_assesment/helpers/colors.dart';
 import 'package:fs_task_assesment/services/auth_service.dart';
+import 'package:fs_task_assesment/services/user_service.dart';
 import 'package:fs_task_assesment/views/auth/sign_up_view.dart';
 import 'package:fs_task_assesment/views/home/home_view.dart';
 
@@ -128,9 +129,12 @@ class _SignInViewState extends State<SignInView> {
                                 _isLoading = true;
                               });
 
+                              UserService userService = UserService();
+
                               final result = await AuthService().signInUser(
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
+                                userservice: userService,
                               );
 
                               if (result.status != false) {

@@ -29,4 +29,22 @@ class UserService {
       throw Exception(err.toString());
     }
   }
+
+  Future<UserModel?> getUserData({required String userId}) async {
+    try {
+      final userData = await _firestore.collection('users').doc(userId).get();
+
+      if (userData.data() != null) {
+        UserModel user = UserModel.fromMap(userData.data() ?? {});
+
+        return user;
+      }
+
+      return null;
+    } on FirebaseException catch (exception) {
+      throw Exception(exception.message.toString());
+    } catch (err) {
+      throw Exception(err.toString());
+    }
+  }
 }

@@ -58,6 +58,7 @@ class AuthService {
   Future<AuthResponse> signInUser({
     required String email,
     required String password,
+    required UserService userservice,
   }) async {
     try {
       final UserCredential result = await _firebaseAuth
@@ -73,7 +74,11 @@ class AuthService {
           SpHelper.addOrUpdateRefreshToken(result.user?.refreshToken ?? '');
         }
 
-        // Todo: Get user data and pass to App Data:
+        UserModel? user = await userservice.getUserData(
+          userId: _firebaseAuth.currentUser?.uid ?? '',
+        );
+
+        AppData.shared.user = user;
 
         return AuthResponse(status: true, message: "Welcome Back");
       }
@@ -99,33 +104,35 @@ class AuthService {
     }
   }
 
-  Future<bool> checkLoginStatus() async {
+  Future<AuthResponse> checkLoginStatus(UserService userService) async {
     String? accessToken = await SpHelper.readAccessToken();
     String? refreshToken = await SpHelper.readRefreshToken();
 
     if (accessToken != null && refreshToken != null) {
       final currentUser = _firebaseAuth.currentUser;
       if (currentUser != null) {
-        // Todo: Get user Data from DB:
+        UserModel? user = await userService.getUserData(
+          userId: _firebaseAuth.currentUser?.uid ?? '',
+        );
 
-        // Todo: Pass user Data to AppData:
-        // AppData.shared.user = UserModel(
-        //   uid: _firebaseAuth.currentUser!.uid,
-        //   name: userModel.name,
-        //   phone: userModel.phone,
-        //   email: userModel.email,
-        //   password: userModel.password,
-        // );
+        if (user != null) {
+          AppData.shared.user = user;
 
-        return true;
+          return AuthResponse(
+            status: true,
+            message: "User Data Fetched",
+            userModel: user,
+          );
+        }
       }
     }
-    return false;
+    return AuthResponse(status: false, message: "Error checking Login Status");
   }
 }
 
 class AuthResponse {
   final bool status;
   final String message;
-  AuthResponse({required this.status, required this.message});
+  final UserModel? userModel;
+  AuthResponse({required this.status, required this.message, this.userModel});
 }
