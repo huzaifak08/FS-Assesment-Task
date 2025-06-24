@@ -1,0 +1,131 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fs_task_assesment/helpers/app_data.dart';
+import 'package:fs_task_assesment/helpers/sp_helper.dart';
+import 'package:fs_task_assesment/models/user.dart';
+import 'package:fs_task_assesment/services/user_service.dart';
+
+class AuthService {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  Future<AuthResponse> signUpUser({
+    required UserModel userModel,
+    required UserService userService,
+  }) async {
+    try {
+      final UserCredential value = await _firebaseAuth
+          .createUserWithEmailAndPassword(
+            email: userModel.email,
+            password: userModel.password,
+          );
+
+      if (value.user != null) {
+        final User? firebaseUser = _firebaseAuth.currentUser;
+
+        if (firebaseUser != null) {
+          UserModel user = UserModel(
+            uid: firebaseUser.uid,
+            name: userModel.name,
+            email: userModel.email,
+            password: userModel.password,
+          );
+
+          AppData.shared.user = user;
+
+          await userService.saveUserData(user: user);
+        }
+
+        String? idToken = await value.user?.getIdToken();
+
+        if (idToken != null && value.user?.refreshToken != null) {
+          SpHelper.addOrUpdateAccessToken(idToken);
+          SpHelper.addOrUpdateRefreshToken(value.user!.refreshToken!);
+        }
+
+        return AuthResponse(status: true, message: "Welcome to FS Programming");
+      }
+
+      return AuthResponse(status: false, message: "Unknown error occurred");
+    } on FirebaseAuthException catch (e) {
+      return AuthResponse(
+        status: false,
+        message: e.message ?? "Authentication error",
+      );
+    } catch (e) {
+      return AuthResponse(status: false, message: e.toString());
+    }
+  }
+
+  Future<AuthResponse> signInUser({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final UserCredential result = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final User? user = result.user;
+
+      if (user != null) {
+        String? idToken = await result.user?.getIdToken();
+
+        if (idToken != null && result.user?.refreshToken != null) {
+          SpHelper.addOrUpdateAccessToken(idToken);
+          SpHelper.addOrUpdateRefreshToken(result.user?.refreshToken ?? '');
+        }
+
+        // Todo: Get user data and pass to App Data:
+
+        return AuthResponse(status: true, message: "Welcome Back");
+      }
+
+      return AuthResponse(status: false, message: "Unknown Exception occoured");
+    } on FirebaseAuthException catch (err) {
+      return AuthResponse(status: false, message: err.message.toString());
+    } catch (err) {
+      throw Exception(err.toString());
+    }
+  }
+
+  Future<bool> signOutUser() async {
+    try {
+      SpHelper.removeAllData();
+      await _firebaseAuth.signOut().then((value) => true);
+
+      return false;
+    } on FirebaseAuthException catch (err) {
+      throw Exception(err.message.toString());
+    } catch (err) {
+      throw Exception(err.toString());
+    }
+  }
+
+  Future<bool> checkLoginStatus() async {
+    String? accessToken = await SpHelper.readAccessToken();
+    String? refreshToken = await SpHelper.readRefreshToken();
+
+    if (accessToken != null && refreshToken != null) {
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser != null) {
+        // Todo: Get user Data from DB:
+
+        // Todo: Pass user Data to AppData:
+        // AppData.shared.user = UserModel(
+        //   uid: _firebaseAuth.currentUser!.uid,
+        //   name: userModel.name,
+        //   phone: userModel.phone,
+        //   email: userModel.email,
+        //   password: userModel.password,
+        // );
+
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+class AuthResponse {
+  final bool status;
+  final String message;
+  AuthResponse({required this.status, required this.message});
+}
