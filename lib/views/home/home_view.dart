@@ -5,12 +5,21 @@ import 'package:fs_task_assesment/providers/products_provider.dart';
 import 'package:fs_task_assesment/views/product_detail/product_detail_view.dart';
 import 'package:shimmer/shimmer.dart';
 
-class HomeView extends ConsumerWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final productsProvider = ref.watch(productNotifierProvider);
+  ConsumerState<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends ConsumerState<HomeView> {
+  String searchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final productsAsyncValue = searchQuery.isEmpty
+        ? ref.watch(productNotifierProvider)
+        : ref.watch(searchProductsProvider(searchQuery));
 
     return Scaffold(
       body: SafeArea(
@@ -27,37 +36,40 @@ class HomeView extends ConsumerWidget {
                   Text(
                     "FS Programmers",
                     style: TextStyle(
-                      fontSize: 24, // Adjust the font size as needed
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors
-                          .black, // Set the color to black or any color you prefer
+                      color: Colors.black,
                     ),
                   ),
                 ],
               ),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
               SearchBar(
-                elevation: MaterialStateProperty.all(0),
-                backgroundColor: MaterialStateProperty.all(
+                elevation: WidgetStateProperty.all(0),
+                backgroundColor: WidgetStateProperty.all(
                   Colors.grey.withOpacity(0.1),
                 ),
                 leading: const Icon(Icons.search),
                 hintText: 'Search Product',
-                onChanged: (value) {},
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.trim();
+                  });
+                },
               ),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
 
-              productsProvider.when(
-                data: (data) {
+              productsAsyncValue.when(
+                data: (products) {
                   return Expanded(
                     child: GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        childAspectRatio: 0.6, // Aspect ratio for tiles
+                        childAspectRatio: 0.6,
                       ),
-                      itemCount: data?.length,
+                      itemCount: products?.length,
                       itemBuilder: (context, index) {
                         return ProductTile(
                           onTap: () {
@@ -65,18 +77,18 @@ class HomeView extends ConsumerWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ProductDetailView(product: data[index]),
+                                    ProductDetailView(product: products[index]),
                               ),
                             );
                           },
-                          product: data![index],
+                          product: products![index],
                         );
                       },
                     ),
                   );
                 },
                 error: (error, stackTrace) =>
-                    Center(child: Text("Error Occurred")),
+                    Center(child: Text("Error Occurred: $error")),
                 loading: () => _buildShimmerLoading(context),
               ),
             ],
@@ -94,7 +106,7 @@ class HomeView extends ConsumerWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: 6, // Number of shimmer items
+        itemCount: 6,
         itemBuilder: (context, index) {
           return Shimmer.fromColors(
             baseColor: Colors.grey[300]!,
@@ -107,20 +119,14 @@ class HomeView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Shimmer effect for the product image
                   Flexible(
                     child: Container(
-                      height:
-                          MediaQuery.sizeOf(context).height *
-                          0.2, // Fix the height to match ProductTile
+                      height: MediaQuery.sizeOf(context).height * 0.2,
                       width: double.infinity,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.01,
-                  ), // Adjust spacing
-                  // Shimmer effect for the product title
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
                   Flexible(
                     child: Container(
                       height: 20,
@@ -128,15 +134,12 @@ class HomeView extends ConsumerWidget {
                       width: double.infinity,
                     ),
                   ),
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.01,
-                  ), // Adjust spacing
-                  // Shimmer effect for the product price
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
                   Flexible(
                     child: Container(
                       height: 20,
                       color: Colors.grey,
-                      width: 100, // Adjust width for consistency
+                      width: 100,
                     ),
                   ),
                 ],
