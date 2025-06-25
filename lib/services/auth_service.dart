@@ -36,9 +36,8 @@ class AuthService {
 
         String? idToken = await value.user?.getIdToken();
 
-        if (idToken != null && value.user?.refreshToken != null) {
-          SpHelper.addOrUpdateAccessToken(idToken);
-          SpHelper.addOrUpdateRefreshToken(value.user!.refreshToken!);
+        if (idToken != null) {
+          await SpHelper.addOrUpdateAccessToken(idToken);
         }
 
         return AuthResponse(status: true, message: "Welcome to FS Programming");
@@ -69,9 +68,8 @@ class AuthService {
       if (user != null) {
         String? idToken = await result.user?.getIdToken();
 
-        if (idToken != null && result.user?.refreshToken != null) {
+        if (idToken != null) {
           SpHelper.addOrUpdateAccessToken(idToken);
-          SpHelper.addOrUpdateRefreshToken(result.user?.refreshToken ?? '');
         }
 
         UserModel? user = await userservice.getUserData(
@@ -106,9 +104,8 @@ class AuthService {
 
   Future<AuthResponse> checkLoginStatus(UserService userService) async {
     String? accessToken = await SpHelper.readAccessToken();
-    String? refreshToken = await SpHelper.readRefreshToken();
 
-    if (accessToken != null && refreshToken != null) {
+    if (accessToken != null && _firebaseAuth.currentUser != null) {
       final currentUser = _firebaseAuth.currentUser;
       if (currentUser != null) {
         UserModel? user = await userService.getUserData(

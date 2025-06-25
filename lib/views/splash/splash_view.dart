@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fs_task_assesment/views/auth/sign_up_view.dart';
+import 'package:fs_task_assesment/services/auth_service.dart';
+import 'package:fs_task_assesment/services/user_service.dart';
+import 'package:fs_task_assesment/views/auth/sign_in_view.dart';
+import 'package:fs_task_assesment/views/home/home_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -14,13 +17,24 @@ class SplashView extends StatefulWidget {
 class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () => checkUserLoggedInStatus());
+    super.initState();
+  }
+
+  void checkUserLoggedInStatus() async {
+    final result = await AuthService().checkLoginStatus(UserService());
+
+    if (result.status != false) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignUpView()),
+        MaterialPageRoute(builder: (context) => HomeView()),
       );
-    });
-    super.initState();
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignInView()),
+      );
+    }
   }
 
   @override
