@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/components/image_display_widget.dart';
 import 'package:fs_task_assesment/helpers/colors.dart';
 import 'package:fs_task_assesment/models/product.dart';
+import 'package:fs_task_assesment/providers/products_provider.dart';
 
 class ProductDetailView extends StatefulWidget {
   final ProductModel product;
@@ -14,7 +16,6 @@ class ProductDetailView extends StatefulWidget {
 class _ProductDetailViewState extends State<ProductDetailView>
     with SingleTickerProviderStateMixin {
   late AnimationController _cartAnimController;
-  bool _addedToCart = false;
 
   @override
   void initState() {
@@ -31,14 +32,18 @@ class _ProductDetailViewState extends State<ProductDetailView>
     super.dispose();
   }
 
-  void _onAddToCart() {
-    setState(() => _addedToCart = !_addedToCart);
-    if (_addedToCart) {
+  void _onAddToCart(ProductModel product, WidgetRef ref) {
+    final cart = ref.read(cartProvider);
+
+    if (!cart.contains(product)) {
+      ref.read(cartProvider.notifier).state = [...cart, product];
       _cartAnimController.forward();
     } else {
+      ref.read(cartProvider.notifier).state = cart
+          .where((item) => item != product)
+          .toList();
       _cartAnimController.reverse();
     }
-    // Trigger your actual add-to-cart logic here
   }
 
   @override
@@ -51,7 +56,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
       body: SafeArea(
         child: Stack(
           children: [
-            // Parallax background
             Positioned(
               top: 0,
               left: 0,
@@ -59,7 +63,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
               height: size.height * 0.55,
               child: Hero(
                 tag: 'product-image-${product.id}',
-                // child: Image.network(product.image, fit: BoxFit.cover),
                 child: ImageDisplayWidget(
                   mediaId: product.id.toString(),
                   imageUrl: product.image,
@@ -68,7 +71,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
                 ),
               ),
             ),
-            // Content card
             DraggableScrollableSheet(
               initialChildSize: 0.48,
               minChildSize: 0.48,
@@ -108,7 +110,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
                           color: Colors.black,
                         ),
                       ),
-
                       const SizedBox(height: 12),
                       Text(
                         product.description,
@@ -128,7 +129,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
                               color: AppColors.primaryColor,
                             ),
                           ),
-
                           const SizedBox(width: 12),
                           if (product.discount > 0)
                             ScaleTransition(
@@ -170,44 +170,52 @@ class _ProductDetailViewState extends State<ProductDetailView>
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Animated Add to Cart button
-                      AnimatedBuilder(
-                        animation: _cartAnimController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: 1 + _cartAnimController.value * 0.05,
-                            child: Opacity(
-                              opacity: 1 - _cartAnimController.value * 0.2,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _addedToCart
-                                      ? Colors.green
-                                      : AppColors.primaryColor,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 32,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(32),
+                      // Consumer to listen to cart state
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final cartItems = ref.watch(cartProvider);
+
+                          final isInCart = cartItems.contains(product);
+
+                          return AnimatedBuilder(
+                            animation: _cartAnimController,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: 1 + _cartAnimController.value * 0.05,
+                                child: Opacity(
+                                  opacity: 1 - _cartAnimController.value * 0.2,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isInCart
+                                          ? Colors.green
+                                          : AppColors.primaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(32),
+                                      ),
+                                    ),
+                                    icon: Icon(
+                                      isInCart
+                                          ? Icons.check_circle
+                                          : Icons.add_shopping_cart,
+                                      size: 28,
+                                      color: AppColors.whiteColor,
+                                    ),
+                                    label: Text(
+                                      isInCart ? "Added" : "Add to Cart",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: AppColors.whiteColor,
+                                      ),
+                                    ),
+                                    onPressed: () => _onAddToCart(product, ref),
                                   ),
                                 ),
-                                icon: Icon(
-                                  _addedToCart
-                                      ? Icons.check_circle
-                                      : Icons.add_shopping_cart,
-                                  size: 28,
-                                  color: AppColors.whiteColor,
-                                ),
-                                label: Text(
-                                  _addedToCart ? "Added" : "Add to Cart",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
-                                onPressed: _onAddToCart,
-                              ),
-                            ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -217,7 +225,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
                 );
               },
             ),
-            // Back button
             Positioned(
               top: 16,
               left: 16,

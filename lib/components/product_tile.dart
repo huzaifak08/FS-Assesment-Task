@@ -17,46 +17,66 @@ class ProductTile extends StatelessWidget {
       // Only take the first two words
       displayTitle = titleWords.sublist(0, 2).join(' ');
     }
+
     return InkWell(
       onTap: onTap,
-      child: GridTile(
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.sizeOf(context).width * 0.08,
-            vertical: MediaQuery.sizeOf(context).height * 0.015,
-          ),
-          child: Stack(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 5), // Shadow for a nice floating effect
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: ImageDisplayWidget(
-                      mediaId: product.id.toString(),
-                      imageUrl: product.image,
-                      imageFor: 'product',
-                      showProgress: true,
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
-                  Text(
-                    displayTitle,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "\$${product.price}",
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              // Product Image
+              SizedBox(
+                height:
+                    MediaQuery.sizeOf(context).height *
+                    0.2, // Set height for the image
+                width: double.infinity,
+                child: ImageDisplayWidget(
+                  mediaId: product.id.toString(),
+                  imageUrl: product.image,
+                  imageFor: 'product',
+                  showProgress: true,
+                ),
               ),
-              Positioned(
-                right: 0,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: const Icon(Icons.heart_broken),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.sizeOf(context).height * 0.01,
+                  horizontal: MediaQuery.sizeOf(context).width * 0.02,
+                ),
+                child: Text(
+                  displayTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis, // Handle long titles
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.sizeOf(context).width * 0.02,
+                ),
+                child: Text(
+                  "\$${product.price}",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

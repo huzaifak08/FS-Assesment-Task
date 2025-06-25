@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/components/product_tile.dart';
 import 'package:fs_task_assesment/providers/products_provider.dart';
 import 'package:fs_task_assesment/views/product_detail/product_detail_view.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -25,12 +26,13 @@ class HomeView extends ConsumerWidget {
                 children: [
                   Text(
                     "FS Programmers",
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: TextStyle(
+                      fontSize: 24, // Adjust the font size as needed
+                      fontWeight: FontWeight.bold,
+                      color: Colors
+                          .black, // Set the color to black or any color you prefer
+                    ),
                   ),
-                  // CircleAvatar(
-                  //   radius: MediaQuery.sizeOf(context).width * 0.07,
-                  //   backgroundImage: const AssetImage("assets/profile.png"),
-                  // ),
                 ],
               ),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
@@ -49,11 +51,12 @@ class HomeView extends ConsumerWidget {
                 data: (data) {
                   return Expanded(
                     child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 1,
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.6, // Aspect ratio for tiles
+                      ),
                       itemCount: data?.length,
                       itemBuilder: (context, index) {
                         return ProductTile(
@@ -73,12 +76,74 @@ class HomeView extends ConsumerWidget {
                   );
                 },
                 error: (error, stackTrace) =>
-                    Center(child: Text("Error Occoured")),
-                loading: () => Center(child: CircularProgressIndicator()),
+                    Center(child: Text("Error Occurred")),
+                loading: () => _buildShimmerLoading(context),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading(BuildContext context) {
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: 6, // Number of shimmer items
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Shimmer effect for the product image
+                  Flexible(
+                    child: Container(
+                      height:
+                          MediaQuery.sizeOf(context).height *
+                          0.2, // Fix the height to match ProductTile
+                      width: double.infinity,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.01,
+                  ), // Adjust spacing
+                  // Shimmer effect for the product title
+                  Flexible(
+                    child: Container(
+                      height: 20,
+                      color: Colors.grey,
+                      width: double.infinity,
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.01,
+                  ), // Adjust spacing
+                  // Shimmer effect for the product price
+                  Flexible(
+                    child: Container(
+                      height: 20,
+                      color: Colors.grey,
+                      width: 100, // Adjust width for consistency
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fs_task_assesment/services/auth_service.dart';
 import 'package:fs_task_assesment/services/user_service.dart';
 import 'package:fs_task_assesment/views/auth/sign_in_view.dart';
-import 'package:fs_task_assesment/views/home/home_view.dart';
+import 'package:fs_task_assesment/views/menu/nav_menu.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -27,7 +27,7 @@ class _SplashViewState extends State<SplashView> {
     if (result.status != false) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeView()),
+        MaterialPageRoute(builder: (context) => NavigationMenu()),
       );
     } else {
       Navigator.pushReplacement(
