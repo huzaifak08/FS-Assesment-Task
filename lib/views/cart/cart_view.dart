@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/helpers/colors.dart';
-import 'package:fs_task_assesment/models/product.dart';
-import 'package:fs_task_assesment/providers/products_provider.dart';
+import 'package:fs_task_assesment/views/cart/cart_view_model.dart';
 
 class CartView extends ConsumerStatefulWidget {
   const CartView({super.key});
@@ -12,7 +11,6 @@ class CartView extends ConsumerStatefulWidget {
 }
 
 class _CartViewState extends ConsumerState<CartView> {
-  // Add a GlobalKey for the AnimatedList
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
@@ -57,8 +55,12 @@ class _CartViewState extends ConsumerState<CartView> {
     );
   }
 
-  Widget _cartHeader(BuildContext context, List<ProductModel> cartItems) {
-    int totalPrice = cartItems.fold(0, (sum, item) => sum + item.price);
+  Widget _cartHeader(BuildContext context, List<CartItem> cartItems) {
+    int totalPrice = cartItems.fold(
+      0,
+      (sum, item) => sum + item.product.price * item.quantity,
+    );
+    int totalQuantity = cartItems.fold(0, (sum, item) => sum + item.quantity);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +75,7 @@ class _CartViewState extends ConsumerState<CartView> {
         ),
         SizedBox(height: 8),
         Text(
-          "Total items: ${cartItems.length}",
+          "Total items: $totalQuantity",
           style: TextStyle(color: Colors.grey[600]),
         ),
         SizedBox(height: 8),
@@ -91,10 +93,12 @@ class _CartViewState extends ConsumerState<CartView> {
 
   Widget _buildCartItem(
     BuildContext context,
-    ProductModel product,
+    CartItem cartItem,
     Animation<double> animation,
     int index,
   ) {
+    final product = cartItem.product;
+
     return FadeTransition(
       opacity: animation,
       child: ScaleTransition(
@@ -136,7 +140,7 @@ class _CartViewState extends ConsumerState<CartView> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "\$${product.price}",
+                        "\$${product.price * cartItem.quantity}",
                         style: TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
@@ -145,37 +149,64 @@ class _CartViewState extends ConsumerState<CartView> {
                     ],
                   ),
                 ),
+                // Quantity controls
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (cartItem.quantity > 1) {
+                          ref
+                              .read(cartProvider.notifier)
+                              .updateQuantity(product, cartItem.quantity - 1);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.remove_circle_outline,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      "${cartItem.quantity}",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        ref
+                            .read(cartProvider.notifier)
+                            .updateQuantity(product, cartItem.quantity + 1);
+                      },
+                      icon: Icon(Icons.add_circle_outline, color: Colors.green),
+                    ),
+                  ],
+                ),
                 // Remove button
                 IconButton(
                   onPressed: () {
-                    // Get the current cart
                     final cart = ref.read(cartProvider);
 
-                    // Find the index of the product to remove
-                    final itemIndex = cart.indexOf(product);
+                    final itemIndex = cart.indexOf(cartItem);
 
                     if (itemIndex != -1) {
-                      // First remove the item with animation
                       _listKey.currentState!.removeItem(
                         itemIndex,
                         (context, animation) => _buildCartItem(
                           context,
-                          product,
+                          cartItem,
                           animation,
                           itemIndex,
                         ),
                         duration: Duration(milliseconds: 300),
                       );
 
-                      // Then update the state after a small delay to let the animation complete
                       Future.delayed(Duration(milliseconds: 300), () {
-                        ref.read(cartProvider.notifier).state = cart
-                            .where((item) => item != product)
-                            .toList();
+                        ref.read(cartProvider.notifier).removeFromCart(product);
                       });
                     }
                   },
-                  icon: Icon(Icons.remove_circle_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: Colors.red),
                 ),
               ],
             ),

@@ -4,7 +4,7 @@ import 'package:fs_task_assesment/services/products_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'products_provider.g.dart';
 
-final cartProvider = StateProvider<List<ProductModel>>((ref) => []);
+// final cartProvider = StateProvider<List<ProductModel>>((ref) => []);
 
 @Riverpod(keepAlive: true)
 class ProductNotifier extends _$ProductNotifier {

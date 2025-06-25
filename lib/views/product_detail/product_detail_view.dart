@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/components/image_display_widget.dart';
 import 'package:fs_task_assesment/helpers/colors.dart';
 import 'package:fs_task_assesment/models/product.dart';
-import 'package:fs_task_assesment/providers/products_provider.dart';
+import 'package:fs_task_assesment/views/cart/cart_view_model.dart';
 
 class ProductDetailView extends StatefulWidget {
   final ProductModel product;
@@ -32,16 +32,19 @@ class _ProductDetailViewState extends State<ProductDetailView>
     super.dispose();
   }
 
+  // Add to cart method
   void _onAddToCart(ProductModel product, WidgetRef ref) {
-    final cart = ref.read(cartProvider);
+    final cartItems = ref.read(cartProvider);
+    final existingItem = cartItems.firstWhere(
+      (item) => item.product.id == product.id,
+      orElse: () => CartItem(product: product),
+    );
 
-    if (!cart.contains(product)) {
-      ref.read(cartProvider.notifier).state = [...cart, product];
+    if (!cartItems.contains(existingItem)) {
+      ref.read(cartProvider.notifier).addToCart(product);
       _cartAnimController.forward();
     } else {
-      ref.read(cartProvider.notifier).state = cart
-          .where((item) => item != product)
-          .toList();
+      ref.read(cartProvider.notifier).removeFromCart(product);
       _cartAnimController.reverse();
     }
   }
@@ -174,8 +177,9 @@ class _ProductDetailViewState extends State<ProductDetailView>
                       Consumer(
                         builder: (context, ref, child) {
                           final cartItems = ref.watch(cartProvider);
-
-                          final isInCart = cartItems.contains(product);
+                          final isInCart = cartItems.any(
+                            (cartItem) => cartItem.product.id == product.id,
+                          );
 
                           return AnimatedBuilder(
                             animation: _cartAnimController,
