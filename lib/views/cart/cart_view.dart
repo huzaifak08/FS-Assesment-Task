@@ -18,7 +18,6 @@ class _CartViewState extends ConsumerState<CartView> {
     final cartItems = ref.watch(cartProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Your Cart"),
         backgroundColor: AppColors.primaryColor,
@@ -65,18 +64,11 @@ class _CartViewState extends ConsumerState<CartView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Cart Summary",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+        Text("Cart Summary", style: Theme.of(context).textTheme.titleMedium),
         SizedBox(height: 8),
         Text(
           "Total items: $totalQuantity",
-          style: TextStyle(color: Colors.grey[600]),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         SizedBox(height: 8),
         Text(
@@ -104,6 +96,7 @@ class _CartViewState extends ConsumerState<CartView> {
       child: ScaleTransition(
         scale: animation,
         child: Card(
+          shadowColor: AppColors.whiteColor,
           elevation: 5,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -131,11 +124,7 @@ class _CartViewState extends ConsumerState<CartView> {
                     children: [
                       Text(
                         product.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4),

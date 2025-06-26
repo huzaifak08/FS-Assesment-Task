@@ -92,9 +92,9 @@ class AuthService {
   Future<bool> signOutUser() async {
     try {
       SpHelper.removeAllData();
-      await _firebaseAuth.signOut().then((value) => true);
+      await _firebaseAuth.signOut();
 
-      return false;
+      return true;
     } on FirebaseAuthException catch (err) {
       throw Exception(err.message.toString());
     } catch (err) {

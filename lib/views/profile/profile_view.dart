@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/components/image_display_widget.dart';
 import 'package:fs_task_assesment/helpers/app_data.dart';
+import 'package:fs_task_assesment/helpers/app_provider_container.dart';
 import 'package:fs_task_assesment/helpers/colors.dart';
+import 'package:fs_task_assesment/providers/theme_provider.dart';
+import 'package:fs_task_assesment/services/auth_service.dart';
+import 'package:fs_task_assesment/views/cart/cart_view_model.dart';
+import 'package:fs_task_assesment/views/splash/splash_view.dart';
 
-class ProfileView extends StatefulWidget {
+class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
-
-  @override
-  State<ProfileView> createState() => _ProfileViewState();
-}
-
-class _ProfileViewState extends State<ProfileView> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +31,6 @@ class _ProfileViewState extends State<ProfileView> {
                     "PROFILE",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  // CircleAvatar(
-                  //   radius: MediaQuery.sizeOf(context).width * 0.07,
-                  //   backgroundImage: const AssetImage("assets/profile.png"),
-                  // ),
                 ],
               ),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
@@ -95,6 +87,35 @@ class _ProfileViewState extends State<ProfileView> {
 
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
 
+              // Dark Mode Toggle Switch
+              Consumer(
+                builder: (context, ref, child) {
+                  final currentTheme = ref.watch(themeProvider);
+
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.brightness_6,
+                      color: AppColors.primaryColor,
+                    ),
+                    title: Text(
+                      "Dark Mode",
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    trailing: Switch(
+                      activeColor: AppColors.primaryColor,
+                      value: currentTheme == ThemeMode.dark,
+                      onChanged: (bool value) {
+                        ref.read(themeProvider.notifier).state = value
+                            ? ThemeMode.dark
+                            : ThemeMode.light;
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
+
               // Elevated and Styled Logout Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -106,10 +127,21 @@ class _ProfileViewState extends State<ProfileView> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  elevation: 8, // Subtle shadow effect
+                  elevation: 8,
                 ),
-                onPressed: () {
-                  // Handle logout functionality
+                onPressed: () async {
+                  final result = await AuthService().signOutUser();
+
+                  AppProviderContainer.instance
+                      .read(cartProvider.notifier)
+                      .removeAllItemsFromCart();
+
+                  if (result) {
+                    Navigator.pushReplacement(
+                      AppData.shared.navigatorKey.currentContext ?? context,
+                      MaterialPageRoute(builder: (context) => SplashView()),
+                    );
+                  }
                 },
                 child: Text(
                   "Logout",
@@ -137,15 +169,7 @@ class _ProfileViewState extends State<ProfileView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: Icon(icon, color: AppColors.primaryColor, size: 28),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: 18, // Adjust font size
-              fontWeight: FontWeight.w500, // Slightly bold
-              color:
-                  Colors.black, // You can adjust the color to match your theme
-            ),
-          ),
+          title: Text(title),
           subtitle: Text(
             value,
             style: TextStyle(

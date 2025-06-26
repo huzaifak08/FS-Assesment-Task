@@ -8,7 +8,7 @@ import 'package:fs_task_assesment/helpers/colors.dart';
 import 'package:fs_task_assesment/services/auth_service.dart';
 import 'package:fs_task_assesment/services/user_service.dart';
 import 'package:fs_task_assesment/views/auth/sign_up_view.dart';
-import 'package:fs_task_assesment/views/home/home_view.dart';
+import 'package:fs_task_assesment/views/menu/nav_menu.dart';
 
 class SignInView extends StatefulWidget {
   const SignInView({super.key});
@@ -20,6 +20,7 @@ class SignInView extends StatefulWidget {
 class _SignInViewState extends State<SignInView> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late FocusNode _passwordFocusNode;
 
   bool _isLoading = false;
   bool _showPassword = false;
@@ -29,6 +30,7 @@ class _SignInViewState extends State<SignInView> {
   void initState() {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _passwordFocusNode = FocusNode();
     super.initState();
   }
 
@@ -36,6 +38,7 @@ class _SignInViewState extends State<SignInView> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -79,10 +82,14 @@ class _SignInViewState extends State<SignInView> {
                       }
                       return null;
                     },
+                    onFiledSubmissionValue: (newValue) {
+                      _passwordFocusNode.requestFocus();
+                    },
                   ),
 
                   CustomTextField(
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     hint: "Password",
                     obsecureText: !_showPassword,
                     onValidator: (value) {
@@ -142,7 +149,7 @@ class _SignInViewState extends State<SignInView> {
                                   AppData.shared.navigatorKey.currentContext ??
                                       context,
                                   MaterialPageRoute(
-                                    builder: (context) => HomeView(),
+                                    builder: (context) => NavigationMenu(),
                                   ),
                                 );
                               } else {

@@ -59,11 +59,7 @@ class ProductTile extends StatelessWidget {
                   displayTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis, // Handle long titles
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
               Padding(
@@ -72,11 +68,7 @@ class ProductTile extends StatelessWidget {
                 ),
                 child: Text(
                   "\$${product.price}",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
             ],

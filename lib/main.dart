@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fs_task_assesment/helpers/app_data.dart';
 import 'package:fs_task_assesment/helpers/app_provider_container.dart';
+import 'package:fs_task_assesment/helpers/themes.dart';
+import 'package:fs_task_assesment/providers/theme_provider.dart';
 import 'package:fs_task_assesment/views/splash/splash_view.dart';
 
 void main() async {
@@ -23,16 +25,18 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentTheme = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      themeMode: currentTheme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
       navigatorKey: AppData.shared.navigatorKey,
       home: const SplashView(),
     );

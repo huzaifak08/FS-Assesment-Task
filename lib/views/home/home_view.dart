@@ -48,11 +48,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 children: [
                   Text(
                     "FS Programmers",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ],
               ),
@@ -126,11 +122,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
         itemCount: 6,
         itemBuilder: (context, index) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: Colors.grey,
+            highlightColor: Colors.grey,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).appBarTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(

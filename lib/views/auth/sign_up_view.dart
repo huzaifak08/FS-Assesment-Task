@@ -9,7 +9,7 @@ import 'package:fs_task_assesment/models/user.dart';
 import 'package:fs_task_assesment/services/auth_service.dart';
 import 'package:fs_task_assesment/services/user_service.dart';
 import 'package:fs_task_assesment/views/auth/sign_in_view.dart';
-import 'package:fs_task_assesment/views/home/home_view.dart';
+import 'package:fs_task_assesment/views/menu/nav_menu.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -28,12 +28,24 @@ class _SignUpViewState extends State<SignUpView> {
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
 
+  // Focus nodes
+  late FocusNode _nameFocusNode;
+  late FocusNode _emailFocusNode;
+  late FocusNode _passwordFocusNode;
+  late FocusNode _confirmPasswordFocusNode;
+
   @override
   void initState() {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+
+    _nameFocusNode = FocusNode();
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
+    _confirmPasswordFocusNode = FocusNode();
+
     super.initState();
   }
 
@@ -43,6 +55,12 @@ class _SignUpViewState extends State<SignUpView> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
+    _nameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -75,11 +93,14 @@ class _SignUpViewState extends State<SignUpView> {
                   CustomTextField(
                     hint: "Name",
                     controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    onFiledSubmissionValue: (newValue) {
+                      FocusScope.of(context).requestFocus(_emailFocusNode);
+                    },
                     onValidator: (value) {
                       if (value!.isEmpty) {
                         return "Name is required";
                       }
-
                       return null;
                     },
                   ),
@@ -87,7 +108,11 @@ class _SignUpViewState extends State<SignUpView> {
                   CustomTextField(
                     hint: "Email Address",
                     controller: _emailController,
+                    focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
+                    onFiledSubmissionValue: (newValue) {
+                      FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    },
                     onValidator: (value) {
                       if (value!.isEmpty) {
                         return "Email is required";
@@ -104,6 +129,12 @@ class _SignUpViewState extends State<SignUpView> {
                     hint: "New Password",
                     obsecureText: !_showPassword,
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    onFiledSubmissionValue: (newValue) {
+                      FocusScope.of(
+                        context,
+                      ).requestFocus(_confirmPasswordFocusNode);
+                    },
                     onValidator: (value) {
                       if (value!.isEmpty) {
                         return "Password is required";
@@ -133,14 +164,31 @@ class _SignUpViewState extends State<SignUpView> {
 
                   CustomTextField(
                     hint: "Confirm Password",
-                    obsecureText: true,
+                    obsecureText: !_showPassword,
                     controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocusNode,
+                    onFiledSubmissionValue: (newValue) {
+                      FocusScope.of(context).unfocus();
+                    },
                     onValidator: (value) {
                       if (value != _passwordController.text) {
                         return "Password doesn't match";
                       }
                       return null;
                     },
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _showPassword = !_showPassword;
+                        });
+                      },
+                      icon: _showPassword
+                          ? Icon(
+                              Icons.visibility,
+                              color: AppColors.primaryColor,
+                            )
+                          : Icon(Icons.visibility_off),
+                    ),
                   ),
 
                   SizedBox(height: 12),
@@ -179,7 +227,7 @@ class _SignUpViewState extends State<SignUpView> {
                                   AppData.shared.navigatorKey.currentContext ??
                                       context,
                                   MaterialPageRoute(
-                                    builder: (context) => HomeView(),
+                                    builder: (context) => NavigationMenu(),
                                   ),
                                 );
                               } else {

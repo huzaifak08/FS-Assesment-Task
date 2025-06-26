@@ -46,7 +46,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(32),
               child: BottomNavigationBar(
-                backgroundColor: Colors.white,
                 elevation: 0,
                 type: BottomNavigationBarType.fixed,
                 selectedLabelStyle: const TextStyle(

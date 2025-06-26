@@ -55,7 +55,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white.withOpacity(0.96),
       body: SafeArea(
         child: Stack(
           children: [
@@ -81,7 +80,7 @@ class _ProductDetailViewState extends State<ProductDetailView>
               builder: (_, controller) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.tertiary,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(32),
                     ),
@@ -107,19 +106,12 @@ class _ProductDetailViewState extends State<ProductDetailView>
                       const SizedBox(height: 24),
                       Text(
                         product.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         product.description,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppColors.secondaryTextColor,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 20),
                       Row(
@@ -233,7 +225,6 @@ class _ProductDetailViewState extends State<ProductDetailView>
               top: 16,
               left: 16,
               child: CircleAvatar(
-                backgroundColor: Colors.white.withOpacity(0.8),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.of(context).pop(),

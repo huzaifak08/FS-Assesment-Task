@@ -68,10 +68,7 @@ class CustomTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
           ),
           hintText: hint,
-          hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: AppColors.primaryTextColor.withOpacity(0.8),
-            height: 0,
-          ),
+          hintStyle: TextStyle(height: 0, color: AppColors.ternaryColor),
           contentPadding: const EdgeInsets.all(15),
           suffixIcon: suffixIcon,
           labelText: label,
