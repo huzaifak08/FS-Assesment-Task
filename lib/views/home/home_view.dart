@@ -14,6 +14,19 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   String searchQuery = '';
+  late FocusNode _searchFocusNode;
+
+  @override
+  void initState() {
+    _searchFocusNode = FocusNode();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +58,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
               SearchBar(
+                focusNode: _searchFocusNode,
                 elevation: WidgetStateProperty.all(0),
                 backgroundColor: WidgetStateProperty.all(
                   Colors.grey.withOpacity(0.1),
@@ -73,6 +87,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       itemBuilder: (context, index) {
                         return ProductTile(
                           onTap: () {
+                            if (_searchFocusNode.hasFocus) {
+                              _searchFocusNode.unfocus();
+                            }
                             Navigator.push(
                               context,
                               MaterialPageRoute(
